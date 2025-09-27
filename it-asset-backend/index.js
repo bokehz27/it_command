@@ -7,6 +7,8 @@ require('dotenv').config();
 const assetRoutes = require('./routes/assets'); 
 const masterDataRoutes = require('./routes/masterData');
 const userRoutes = require('./routes/users');
+const employeeRoutes = require('./routes/employees');
+const ipPoolRoutes = require('./routes/ipPools');
 
 
 const app = express();
@@ -25,6 +27,8 @@ app.get('/', (req, res) => {
 app.use('/api/assets', assetRoutes);
 app.use('/api/master-data', masterDataRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/ip-pools', ipPoolRoutes);
 
 
 const PORT = process.env.PORT || 3001;

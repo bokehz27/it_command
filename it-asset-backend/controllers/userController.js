@@ -1,5 +1,8 @@
+// it-asset-backend/controllers/userController.js
+
 const { User, Role } = require('../models');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken'); // <<< เพิ่มบรรทัดนี้เข้ามา
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -30,9 +33,12 @@ exports.createUser = async (req, res) => {
     }
 };
 
-// --- START: เพิ่มฟังก์ชัน loginUser ---
+// --- START: เพิ่มฟังก์ชัน loginUser (เวอร์ชัน DEBUG) ---
 exports.loginUser = async (req, res) => {
+    // --- DEBUGGING ---
+    console.log('--- Login attempt received ---');
     const { username, password } = req.body;
+    console.log(`Attempting login for user: "${username}" with password: "${password}"`);
 
     try {
         // 1. ค้นหา user จาก username
@@ -41,16 +47,28 @@ exports.loginUser = async (req, res) => {
             include: [{ model: Role, attributes: ['name'] }] 
         });
 
+        // --- DEBUGGING ---
         if (!user) {
+            console.log('>>> DEBUG: User not found in database!');
             return res.status(401).json({ message: 'Invalid credentials' });
         }
+        console.log('>>> DEBUG: User found:', JSON.stringify(user, null, 2));
+
 
         // 2. เปรียบเทียบรหัสผ่านที่ส่งมากับในฐานข้อมูล
         const isMatch = await bcrypt.compare(password, user.password);
 
+        // --- DEBUGGING ---
+        console.log(`>>> DEBUG: Password comparison result (isMatch): ${isMatch}`);
+
+
         if (!isMatch) {
+            console.log('>>> DEBUG: Password does not match.');
             return res.status(401).json({ message: 'Invalid credentials' });
         }
+        
+        console.log('>>> DEBUG: Login successful, creating token...');
+        // --- END DEBUGGING ---
 
         // 3. ถ้าถูกต้อง ให้สร้าง Token
         const payload = {
@@ -70,9 +88,8 @@ exports.loginUser = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('>>> DEBUG: An error occurred during login process:', error);
         res.status(500).json({ message: "Server error during login", error: error.message });
     }
 };
 // --- END: เพิ่มฟังก์ชัน loginUser ---
-
-// ... More user functions will be added later ...
